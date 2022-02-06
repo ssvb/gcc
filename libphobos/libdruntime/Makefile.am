@@ -19,7 +19,7 @@
 include $(top_srcdir)/d_rules.am
 
 # Make sure GDC can find libdruntime include files
-D_EXTRA_DFLAGS=-fpreview=dip1000 -fpreview=fieldwise -fpreview=dtorfields \
+D_EXTRA_DFLAGS=-ftrapv -fpreview=dip1000 -fpreview=fieldwise -fpreview=dtorfields \
 	       -nostdinc -I $(srcdir) -I .
 
 # D flags for compilation
