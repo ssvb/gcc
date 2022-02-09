@@ -887,3 +887,47 @@ unittest
     assert(overflow);                   // sticky
 }
 }
+
+/*******************************
+ * Functions to implement two's complement wrapping arithmetics in
+ * a way that isn't getting trapped by -ftrapv
+ *
+ * TODO: These functions should work as perfect drop-in replacements
+ * for arithmetic expressions. In such a way that "(a + b)" can be
+ * replaced with "wrapping_add(a, b)" anywhere in the code without
+ * introducing any subtle functional changes. If perfect replacement
+ * is not possible, then a compilation error is preferred.
+ * Note: the bswap/byteswap code as a good example how to do it wrong.
+ * Note: the result needs to be promoted to "int" if necessary
+ *
+ * TODO: unit tests to try all permutations of various data types
+ * to ensure that everything works as expected.
+ *
+ * TODO: these should map to just single CPU instructions for best
+ * performance (maybe via some special GCC/LLVM intrinsics)
+ *
+ * FIXME: it's just a quick and dirty prototype, absence of bugs is
+ * not guaranteed
+ */
+T wrapping_add(T)(T a, T b) if (__traits(isIntegral, T) && T.min < 0 && T.sizeof >= int.sizeof)     { bool _; return cast(T) adds(a, b, _); }
+T wrapping_add(T)(T a, T b) if (__traits(isIntegral, T) && !(T.min < 0) && T.sizeof >= int.sizeof)  { return a + b; }
+int wrapping_add(T)(T a, T b) if (__traits(isIntegral, T) && T.min < 0 && T.sizeof < int.sizeof)    { bool _; return adds(a, b, _); }
+int wrapping_add(T)(T a, T b) if (__traits(isIntegral, T) && !(T.min < 0) && T.sizeof < int.sizeof) { return a + b; }
+
+T wrapping_sub(T)(T a, T b) if (__traits(isIntegral, T) && T.min < 0 && T.sizeof >= int.sizeof)     { bool _; return cast(T) subs(a, b, _); }
+T wrapping_sub(T)(T a, T b) if (__traits(isIntegral, T) && !(T.min < 0) && T.sizeof >= int.sizeof)  { return a - b; }
+int wrapping_sub(T)(T a, T b) if (__traits(isIntegral, T) && T.min < 0 && T.sizeof < int.sizeof)    { bool _; return subs(a, b, _); }
+int wrapping_sub(T)(T a, T b) if (__traits(isIntegral, T) && !(T.min < 0) && T.sizeof < int.sizeof) { return a - b; }
+
+T wrapping_mul(T)(T a, T b) if (__traits(isIntegral, T) && T.min < 0 && T.sizeof >= int.sizeof)     { bool _; return cast(T) muls(a, b, _); }
+T wrapping_mul(T)(T a, T b) if (__traits(isIntegral, T) && !(T.min < 0) && T.sizeof >= int.sizeof)  { return a * b; }
+int wrapping_mul(T)(T a, T b) if (__traits(isIntegral, T) && T.min < 0 && T.sizeof < int.sizeof)    { bool _; return muls(a, b, _); }
+int wrapping_mul(T)(T a, T b) if (__traits(isIntegral, T) && !(T.min < 0) && T.sizeof < int.sizeof) { return a * b; }
+
+T wrapping_neg(T)(T a) if (__traits(isIntegral, T) && T.min < 0 && T.sizeof >= int.sizeof)          { bool _; return cast(T) subs(cast(T)0, a, _); }
+T wrapping_neg(T)(T a) if (__traits(isIntegral, T) && !(T.min < 0) && T.sizeof >= int.sizeof)       { return -a; }
+int wrapping_neg(T)(T a) if (__traits(isIntegral, T) && T.min < 0 && T.sizeof < int.sizeof)         { bool _; return subs(cast(T)0, a, _); }
+int wrapping_neg(T)(T a) if (__traits(isIntegral, T) && !(T.min < 0) && T.sizeof < int.sizeof)      { return -a; }
+
+// A workaround for https://gcc.gnu.org/bugzilla/show_bug.cgi?id=77779
+@trusted auto wrapping_sub(T)(T *a, T *b) { return cast(T *)(cast(size_t)a - cast(size_t)b) - cast(T *)0; }
