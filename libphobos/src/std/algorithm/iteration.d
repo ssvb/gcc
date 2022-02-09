@@ -7356,6 +7356,11 @@ if (isInputRange!R && !isInfinite!R && is(typeof(seed = seed + r.front)))
     }
 }
 
+int instantiate_int_array_sum(int[] a)
+{
+  return a.sum;
+}
+
 /// Ditto
 @safe pure nothrow unittest
 {
