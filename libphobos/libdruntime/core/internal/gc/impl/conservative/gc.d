@@ -2289,7 +2289,7 @@ struct Gcx
 
             debug(MARK_PRINTF) printf("\tmark %p: %p\n", rng.pbot, p);
 
-            if (cast(size_t)(p - minAddr) < memSize &&
+            if ((cast(size_t)p - cast(size_t)minAddr) < memSize &&
                 (cast(size_t)p & ~cast(size_t)(PAGESIZE-1)) != pcache)
             {
                 static if (precise) if (rng.pbase)
@@ -2516,7 +2516,7 @@ struct Gcx
         for (auto p = cast(void**)pbot; cast(void*)p < ptop; p++)
         {
             auto ptr = *p;
-            if (cast(size_t)(ptr - minAddr) < memSize)
+            if ((cast(size_t)ptr - cast(size_t)minAddr) < memSize)
                 toscanRoots.push(ptr);
         }
     }

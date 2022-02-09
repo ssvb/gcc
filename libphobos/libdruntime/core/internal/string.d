@@ -114,7 +114,7 @@ char[] signedToTempString(uint radix = 10)(long value, return scope char[] buf) 
 {
     bool neg = value < 0;
     if (neg)
-        value = cast(ulong)-value;
+        value = -cast(ulong)value;
     auto r = unsignedToTempString!radix(value, buf);
     if (neg)
     {
@@ -130,7 +130,7 @@ auto signedToTempString(uint radix = 10)(long value) @safe
 {
     bool neg = value < 0;
     if (neg)
-        value = cast(ulong)-value;
+        value = -cast(ulong)value;
     auto r = unsignedToTempString!radix(value);
     if (neg)
     {
