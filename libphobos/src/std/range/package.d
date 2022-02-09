@@ -6204,6 +6204,7 @@ if ((isIntegral!(CommonType!(B, E)) || isPointer!(CommonType!(B, E)))
         && isIntegral!S)
 {
     import std.conv : unsigned;
+    import core.checkedint : wrapping_neg, wrapping_sub;
 
     alias Value = CommonType!(Unqual!B, Unqual!E);
     alias StepType = Unqual!S;
@@ -6220,18 +6221,18 @@ if ((isIntegral!(CommonType!(B, E)) || isPointer!(CommonType!(B, E)))
             if (current < pastLast && step > 0)
             {
                 // Iterating upward
-                assert(unsigned((pastLast - current) / step) <= size_t.max);
+                assert(unsigned(wrapping_sub(pastLast, current) / step) <= size_t.max);
                 // Cast below can't fail because current < pastLast
                 this.last = cast(Value) (pastLast - 1);
-                this.last -= unsigned(this.last - current) % step;
+                this.last -= unsigned(wrapping_sub(this.last, current)) % step;
             }
             else if (current > pastLast && step < 0)
             {
                 // Iterating downward
-                assert(unsigned((current - pastLast) / (0 - step)) <= size_t.max);
+                assert(unsigned(wrapping_sub(current, pastLast) / wrapping_neg(step)) <= size_t.max);
                 // Cast below can't fail because current > pastLast
                 this.last = cast(Value) (pastLast + 1);
-                this.last += unsigned(current - this.last) % (0 - step);
+                this.last += unsigned(wrapping_sub(current, this.last)) % (0 - step);
             }
             else
             {
@@ -6295,10 +6296,11 @@ if ((isIntegral!(CommonType!(B, E)) || isPointer!(CommonType!(B, E)))
         }
         @property size_t length() const
         {
+            import core.checkedint : wrapping_sub;
             if (step > 0)
-                return 1 + cast(size_t) (unsigned(last - current) / step);
+                return 1 + cast(size_t) (unsigned(wrapping_sub(last, current)) / step);
             if (step < 0)
-                return 1 + cast(size_t) (unsigned(current - last) / (0 - step));
+                return 1 + cast(size_t) (unsigned(wrapping_sub(current, last)) / (0 - step));
             return 0;
         }
 
@@ -10282,9 +10284,10 @@ do
 
         void popFront()
         {
+            import core.checkedint : wrapping_add;
             assert(!range.empty, "Attempting to popFront an empty enumerate");
             range.popFront();
-            ++index; // When !hasLength!Range, overflow is expected
+            index = cast(typeof(index))wrapping_add(index, 1); // When !hasLength!Range, overflow is expected
         }
 
         static if (isForwardRange!Range)

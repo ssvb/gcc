@@ -4432,25 +4432,25 @@ version (StdUnittest)
     assert(equal(nums, iota(1000)));
 
     assert(equal(
-               poolInstance.map!"a * a"(iota(3_000_001), 10_000),
-               map!"a * a"(iota(3_000_001))
+               poolInstance.map!"a * a"(iota(3_000_001L), 10_000),
+               map!"a * a"(iota(3_000_001L))
            ));
 
     // The filter is to kill random access and test the non-random access
     // branch.
     assert(equal(
                poolInstance.map!"a * a"(
-                   filter!"a == a"(iota(3_000_001)
+                   filter!"a == a"(iota(3_000_001L)
                                   ), 10_000, 1000),
-               map!"a * a"(iota(3_000_001))
+               map!"a * a"(iota(3_000_001L))
            ));
 
     assert(
         reduce!"a + b"(0UL,
-                       poolInstance.map!"a * a"(iota(300_001), 10_000)
+                       poolInstance.map!"a * a"(iota(300_001L), 10_000)
                       ) ==
         reduce!"a + b"(0UL,
-                       map!"a * a"(iota(300_001))
+                       map!"a * a"(iota(300_001L))
                       )
     );
 

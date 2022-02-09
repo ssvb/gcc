@@ -957,13 +957,14 @@ pragma(inline, true)
 private T powIntegralImpl(PowType type, T)(T val)
 {
     import core.bitop : bsr;
+    import core.checkedint : wrapping_neg;
 
     if (val == 0 || (type == PowType.ceil && (val > T.max / 2 || val == T.min)))
         return 0;
     else
     {
         static if (isSigned!T)
-            return cast(Unqual!T) (val < 0 ? -(T(1) << bsr(0 - val) + type) : T(1) << bsr(val) + type);
+            return cast(Unqual!T) (val < 0 ? wrapping_neg(T(1) << bsr(wrapping_neg(val)) + type) : T(1) << bsr(val) + type);
         else
             return cast(Unqual!T) (T(1) << bsr(val) + type);
     }

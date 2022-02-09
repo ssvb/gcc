@@ -2222,6 +2222,7 @@ if ((isIntegral!(CommonType!(T1, T2)) || isSomeChar!(CommonType!(T1, T2))) &&
 {
     import std.conv : text, unsigned;
     import std.exception : enforce;
+    import core.checkedint : wrapping_sub;
     alias ResultType = Unqual!(CommonType!(T1, T2));
     static if (boundaries[0] == '(')
     {
@@ -2250,14 +2251,14 @@ if ((isIntegral!(CommonType!(T1, T2)) || isSomeChar!(CommonType!(T1, T2))) &&
                 return std.random.uniform!ResultType(rng);
             }
         }
-        auto upperDist = unsigned(b - lower) + 1u;
+        auto upperDist = unsigned(wrapping_sub(b, lower)) + 1u;
     }
     else
     {
         enforce(lower < b,
                 text("std.random.uniform(): invalid bounding interval ",
                         boundaries[0], a, ", ", b, boundaries[1]));
-        auto upperDist = unsigned(b - lower);
+        auto upperDist = unsigned(wrapping_sub(b, lower));
     }
 
     assert(upperDist != 0);

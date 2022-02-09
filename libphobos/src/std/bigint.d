@@ -33,6 +33,7 @@ import std.internal.math.biguintcore;
 import std.internal.math.biguintnoasm : BigDigit;
 import std.range.primitives;
 import std.traits;
+import core.checkedint;
 
 /** A struct representing an arbitrary precision integer.
  *
@@ -813,7 +814,7 @@ public:
             else
             {
                 if (l <= ulong(T.max)+1)
-                    return cast(T)-long(l); // -long.min == long.min
+                    return cast(T)long(-l); // -long.min == long.min
             }
         }
 
@@ -1187,10 +1188,10 @@ public:
      */
     long toLong() @safe pure nothrow const @nogc
     {
-        return (sign ? -1 : 1) *
+        return wrapping_mul((sign ? -1 : 1),
           (data.ulongLength == 1  && (data.peekUlong(0) <= sign+cast(ulong)(long.max)) // 1+long.max = |long.min|
           ? cast(long)(data.peekUlong(0))
-          : long.max);
+          : long.max));
     }
 
     ///
@@ -1207,10 +1208,10 @@ public:
      */
     int toInt() @safe pure nothrow @nogc const
     {
-        return (sign ? -1 : 1) *
+        return wrapping_mul((sign ? -1 : 1),
           (data.uintLength == 1  && (data.peekUint(0) <= sign+cast(uint)(int.max)) // 1+int.max = |int.min|
           ? cast(int)(data.peekUint(0))
-          : int.max);
+          : int.max));
     }
 
     ///
@@ -1580,7 +1581,7 @@ if (isIntegral!T)
          * on two's complement machines because unsigned(T.min) = |T.min|
          * even though -T.min = T.min.
          */
-        return unsigned((x < 0) ? cast(T)(0-x) : x);
+        return unsigned((x < 0) ? cast(T)wrapping_neg(x) : x);
     }
     else
     {

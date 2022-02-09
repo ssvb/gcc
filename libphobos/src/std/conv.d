@@ -53,6 +53,7 @@ import std.meta;
 import std.range.primitives;
 import std.traits;
 import std.typecons : Flag, Yes, No, tuple;
+import core.checkedint;
 
 // Same as std.string.format, but "self-importing".
 // Helps reduce code and imports, particularly in static asserts.
@@ -2470,7 +2471,7 @@ if (isSomeChar!(ElementType!Source) &&
                 {
                     // Note: `v` can become negative here in case of parsing
                     // the most negative value:
-                    v = cast(Target) (v * 10 + c);
+                    v = cast(Target) (wrapping_add(wrapping_mul(v, 10), c));
                     ++count;
                     source.popFront();
                 }
@@ -2479,7 +2480,7 @@ if (isSomeChar!(ElementType!Source) &&
             }
 
             if (sign)
-                v = -v;
+                v = wrapping_neg(v);
 
             static if (isNarrowString!Source)
                 s = s[$-source.length..$];
@@ -5682,7 +5683,7 @@ if ((radix == 2 || radix == 8 || radix == 10 || radix == 16) &&
                         buf[0] = cast(char)(cast(uint) value + '0');
                         return;
                     }
-                    value = -value;
+                    value = wrapping_neg(value);
                     neg = true;
                 }
                 auto i = cast(uint) buf.length - 1;

@@ -1748,7 +1748,7 @@ if (is(T == float) || is(T == double)
         // medium sized number, probably with integer and fractional digits
         // this is fastest, because both parts fit into a ulong each
         ulong int_part = mnt >> (T.mant_dig - 1 - exp);
-        ulong frac_part = mnt & ((1L << (T.mant_dig - 1 - exp)) - 1);
+        ulong frac_part = mnt & ((1UL << (T.mant_dig - 1 - exp)) - 1);
 
         // for x87 reals the mantiassa might be up to 3 bits too long
         // we need to save these bits as a tail and handle this separately

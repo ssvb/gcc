@@ -2643,9 +2643,10 @@ int ilogb(T)(const T x) @safe pure nothrow @nogc
 if (isIntegral!T && isSigned!T)
 {
     import std.traits : Unsigned;
+    import core.checkedint : wrapping_neg;
     // Note: abs(x) can not be used because the return type is not Unsigned and
     //       the return value would be wrong for x == int.min
-    Unsigned!T absx =  x >= 0 ? x : -x;
+    Unsigned!T absx =  x >= 0 ? x : wrapping_neg(x);
     return ilogb(absx);
 }
 
